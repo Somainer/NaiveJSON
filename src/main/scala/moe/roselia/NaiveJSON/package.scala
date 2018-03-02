@@ -1,5 +1,6 @@
 package moe.roselia
 
 package object NaiveJSON {
-  object NaiveParser extends Parsers
+  def parseJSON: String => Either[List[(Int, String)], JSON] = JSON.parseJSON
+  def parseJSON_!!(s: String): JSON = JSON.json >> s get_!!
 }

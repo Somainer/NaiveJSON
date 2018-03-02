@@ -14,12 +14,12 @@ object States {
     def latest: Option[(Location, String)] = stack.lastOption
     def latestLoc: Option[Location] = latest map (_._1)
     def label(msg: String): ParseError = ParseError(latestLoc map ((_, msg)) toList)
-    def printTrace(): Unit = {
-      stack.foreach{
-        case (l, s) =>
-          println("at: Line" + l.line)
-          println("  in #" + l.col + ": " + s)
-      }
+    def getTrace:String = stack.map{
+      case (l, s) =>
+        s"at: Line ${l.line}\n  in #${l.col} Found Error: $s"
+    }.reduce(_+_)
+    def printTrace_!(): Unit = {
+      println(getTrace)
     }
   }
 
@@ -59,6 +59,17 @@ object States {
     def getOption : Option[A] = this match {
       case Success(g, _) => Some(g)
       case _ => None
+    }
+    def get_!! : A = this match {
+      case Success(r, _) => r
+      case Failure(e, _) => throw new IllegalArgumentException(e.getTrace)
+    }
+    def getOrElse[B >: A](els: B): B = getOption getOrElse els
+    def getEither: Either[List[(Int, String)], A] = this match {
+      case Success(r, _) => Right(r)
+      case Failure(e, _) => Left(e.stack.map {
+        case (loc, s) => (loc.offset, s)
+      })
     }
   }
   case class Success[+A](get: A, charsConsumed: Int) extends Result[A]

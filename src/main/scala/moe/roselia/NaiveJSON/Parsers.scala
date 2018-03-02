@@ -85,7 +85,7 @@ trait Parsers { self =>
 
   def whiteSpace: Parser[String] = "\\s*".r
 
-  def digit: Parser[String] = "^(0|[1-9][0-9]*|-[1-9][0-9]*)".r.token label "JInt Literal (Non Double)"
+  def digit: Parser[String] = "^(0|[1-9][0-9]*|-[1-9][0-9]*)".r.token label "Int Literal (Non Double)"
 
   def token[A](p: Parser[A]): Parser[A] = whiteSpace *> attempt(p) <* whiteSpace
 
@@ -160,9 +160,8 @@ trait Parsers { self =>
 
     def token: Parser[A] = self.token(p)
 
-    def >>[B](b: B): Parser[B] = self.as(p)(b)
-
     def <=>[B](b: B): Parser[B] = self.as(p)(b)
+    def ⇔[B](b: B): Parser[B] = self.as(p)(b)
 
     def unary_~ : Parser[A] = self.attempt(p)
 
@@ -176,15 +175,15 @@ trait Parsers { self =>
 
     def >>(s: String) = this test s
 
-    def printTestTrace = test _ andThen (_.mapSuccess(s => {
-      println("Success! res = " + s)
+    def printTestTrace_! = test _ andThen (_.mapSuccess(s => {
+      println("Success! got: " + s)
       s
     }).mapError(e => {
-      e.printTrace()
+      e.printTrace_!()
       e
     }))
 
-    def >>! = printTestTrace
+    def >>! = printTestTrace_!
   }
 
 }
