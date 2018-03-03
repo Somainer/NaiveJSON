@@ -6,7 +6,7 @@ import scala.util.Try
 trait Implicits {
   implicit class NaiveString(s: String){
     def toQuoted: String = "\"" + s + "\""
-    def depOf(dep: Int = 0): String = "  " * (dep*0) + s
+    def indentOf(indent: Int)(dep: Int = 0): String = " " * (dep*indent) + s
   }
 
   def parse[T: ParseOp](s: String): Option[T] = Try { implicitly[ParseOp[T]].op(s) }  toOption

@@ -195,4 +195,15 @@ naiveJSON_!!: JSON
 
 注意：这样会在运行时抛出异常，而不会在编译时就检查。
 
-P.S. 为了方便，在Test中我写了很多带感叹号的方法，尾缀_!!可能让你看着难受，写着也难受，这正是我的目的，NaiveJSON提供了很多Option和Either来解决错误问题。NaiveJSON更倾向于使用函数式的方法解决异常问题。
+### JSON 转换为 String
+
+对于一个JSON对象(json: JSON)，有若干方法将其转换为字符串。
+
+`json.toString`: 转换为紧凑的字符串
+
+`json.format(indent: Int)`: 格式化JSON，以`indent`个空格进行缩进
+
+`json.format`: 作用同`json.format(2)`
+
+## P.S.
+为了方便，在Test中我写了很多带感叹号的方法，尾缀_!!可能让你看着难受，写着也难受，这正是我的目的，NaiveJSON提供了很多Option和Either来解决错误问题。NaiveJSON更倾向于使用函数式的方法解决异常问题。

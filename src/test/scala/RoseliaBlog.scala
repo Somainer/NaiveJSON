@@ -27,10 +27,10 @@ object RoseliaBlog {
     val i = 10.0
     val njs =
       naiveJSON_!!"""
-              {}
+              [1,2,{}]
                """
     println("njs=", njs)
-    println(sample)
+    println(sample.format)
     json >>! sample.toString
     println(parse[Int]("233").head)
     println(NaiveJSON.parseJSON("[]"))
@@ -41,6 +41,7 @@ object RoseliaBlog {
     //println(<::>(1,2,3))
     val listOfInt = "[" *> (int <|> ",") <* "]" scope "List of Int"
     listOfInt >>! "[1, 2, 3]"
+    (json >>! "[1, 2, 3]").mapSuccess(s => println(s.format))
   }
 
   def main(args: Array[String]): Unit = {

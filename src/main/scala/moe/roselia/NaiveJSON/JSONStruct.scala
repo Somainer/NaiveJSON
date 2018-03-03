@@ -44,8 +44,7 @@ trait JSONStruct {
       this(js.toIndexedSeq)
     }
     override def getVal: IndexedSeq[JSON] = get
-    override def toStr(dep: Int = 0): String = get.map(_.toString.depOf(dep + 1)).mkString("[", ", ", "]")
-    override def literal: String = toStr()
+    override def literal: String = get.map(_.toString).mkString("[", ", ", "]")
     def !!(idx: Int) = get(idx)
     override def subVal(key: Int): Option[JSON] = Try(get(key)).toOption
 
@@ -58,11 +57,10 @@ trait JSONStruct {
       this(js.map(_.get).reduce(_++_))
     }
     override def getVal: Map[String, JSON] = get
-    override def toStr(dep: Int = 0): String = (for{
-      (k, v) <- get
-    } yield k.toQuoted + s": ${v.toString depOf (dep + 1)}").mkString("{", ", ", "}")
 
-    override def literal: String = toString
+    override def literal: String = get.map{
+      case (k, v) => k.toQuoted + s": ${v.toString}"
+    }.mkString("{", ", ", "}")
 
     def map(f: Map[String, JSON] => Map[String, JSON]):JObject =
       JObject(f(get))

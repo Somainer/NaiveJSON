@@ -16,7 +16,7 @@ object States {
     def label(msg: String): ParseError = ParseError(latestLoc map ((_, msg)) toList)
     def getTrace:String = stack.map{
       case (l, s) =>
-        s"at: Line ${l.line}\n  in #${l.col} Found Error: $s"
+        s"at: Line ${l.line}\n  in #${l.col} Found Error: $s\n"
     }.reduce(_+_)
     def printTrace_!(): Unit = {
       println(getTrace)
