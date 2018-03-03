@@ -1,4 +1,7 @@
 # NaiveJSON
+
+![NaiveJSON](https://github.com/Somainer/NaiveJSON/raw/master/naivejson.png)
+
 A functional JSON parser, with a naive DSL.
 
 一个函数式的JSON解析器，同时可以以一种神奇的方式构建JSON
