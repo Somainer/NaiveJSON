@@ -1,6 +1,6 @@
 package moe.roselia.NaiveJSON
 
 
-object NaiveDSL extends Implicits with JSONStruct {
+object NaiveDSL extends Implicits with JSONStruct with MaybeJSON {
 
 }

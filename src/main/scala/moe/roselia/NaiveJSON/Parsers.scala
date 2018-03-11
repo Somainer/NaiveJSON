@@ -8,13 +8,11 @@ import moe.roselia.NaiveJSON.Implicits._
 
 import scala.util.Try
 
-trait Parsers { self =>
+trait Parsers {
+  self =>
 
   def run[A](p: Parser[A])(input: String): Either[ParseError, A] =
-    p(ParseState(Location(input))) match {
-      case Success(r, _) => Right(r)
-      case Failure(e, _) => Left(e)
-    }
+    p(ParseState(Location(input))) extract input
 
   def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A] = s =>
     s1(s) match {
@@ -26,8 +24,9 @@ trait Parsers { self =>
     p flatMap (a => succeed(f(a)))
 
   def flatMap[A, B](a: Parser[A])(f: A => Parser[B]): Parser[B] = s =>
-    a(s) match {
+    a(s.unsliced) match {
       case Success(r, c) => f(r)(s.advanceBy(c)) addCommit (c != 0) advanceSuccess c
+      case Slice(n) => f(s.slice(n).asInstanceOf[A])(s.advanceBy(n).reslice(s)) advanceSuccess n
       case e@Failure(_, _) => e
     }
 
@@ -58,17 +57,22 @@ trait Parsers { self =>
   def attempt[A](p: Parser[A]): Parser[A] = s =>
     p(s).unCommit
 
-  implicit def string(s: String): Parser[String] = input => {
+  def string(s: String): Parser[String] = input => {
     val msg = s"Expect String: " + s.toQuoted
     if (input.input.startsWith(s)) Success(s, s.length)
     else Failure(input.loc.toError(msg), false)
   }
 
+  def all: Parser[String] = input => Success(input.input, input.input.length)
+
+  def transformBefore(f: String => String): Parser[String] = all map f
+
+  def transform[A](p: Parser[A])(f: String => String): Parser[A] = input => p >> f(input.input)
+
+  implicit def toStringParser(s: String): Parser[String] = string(s)
+
   def slice[A](p: Parser[A]): Parser[String] =
-    s => p(s) match {
-      case Success(_, c) => Success(s.slice(c), c)
-      case f@Failure(_, _) => f
-    }
+    s => p(s sliced).slice
 
   implicit def operators[A](p: Parser[A]): ParserOps[A] = ParserOps(p)
 
@@ -113,9 +117,11 @@ trait Parsers { self =>
     token(quoted label "string literal")
 
   def doubleString: Parser[String] = token("[-+]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
+
   def strictDoubleString: Parser[String] = token("[-+]?([0-9]*\\.)[0-9]+([eE][-+]?[0-9]+)?".r)
 
   def double: Parser[Double] = doubleString map (_ toDouble) label "Double literal"
+
   def double_!! : Parser[Double] = ~(strictDoubleString map (_ toDouble) label "Double literal")
 
   def int_1: Parser[Int] = digit map (_ toInt) label "Integer literal"
@@ -161,6 +167,7 @@ trait Parsers { self =>
     def token: Parser[A] = self.token(p)
 
     def <=>[B](b: B): Parser[B] = self.as(p)(b)
+
     def ⇔[B](b: B): Parser[B] = self.as(p)(b)
 
     def unary_~ : Parser[A] = self.attempt(p)

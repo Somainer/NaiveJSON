@@ -9,7 +9,7 @@ A functional JSON parser, with a naive DSL.
 ## Before
 
 NaiveJSON中的方法，后面是一个感叹号(!)的意味着该方法具有一定的副作用（通常是输出文本）;
-后面是两个感叹号(!!)的意味着有可能抛出异常。
+后面是两个感叹号(!!)的意味着有可能抛出异常。当然，如果其本身返回的就是`Unit`就不受该约定的限制，因为这本身就意味着该方法具有副作用。
 
 如果您遇到了不是这样的情况，可能是我吃错药了。
 
@@ -51,9 +51,32 @@ NaiveJSON中的方法，后面是一个感叹号(!)的意味着该方法具有�
 ```
 如果一个对象是JObject或JArray，subVal在对应的键值才会发生作用，否则总是返回None，!!总是抛出错误
 在subVal可用时，会有apply方法，作用相同。
-如果你确定了JSON的类别，可以将其转换，通过as[T]，例如 `j.as[JObject]`
 
-注意： `JString("233").getAs[Int] = Some(233)`
+如果你确定了JSON的类别，可以将其转换，通过`as[T]`，例如 `j.as[JObject]`
+
+在导入了NaiveDSL之后，`Option[JSON]` 将被隐式转换为MaybeJSON，从而subVal和apply方法可以被链式调用。
+
+`json(key1)(key2)(key3) => Option[JSON]`
+
+`json.subVal(key1).subVal(key2).subVal(key3) => Option[JSON]`
+
+注意： `JString("233").getAs[Int] = Some(233: Int)`
+
+### Dynamic
+
+NaiveJSON目前支持动态访问JSON内的属性，这是实现将其映射为对象之前的妥协。
+
+要想使用，请导入`DynamicJSON`
+
+```Scala
+import moe.roselia.NaiveJSON.dynamicJSON._
+```
+
+假设我们现在有一个JSON对象：json
+
+如果我们想要其中的"foo"属性，只需`val foo = json.foo`，这个操作像MaybeJSON一样，支持链式调用
+
+最后，调用`foo.toOption`，就转换为了`Option[JSON]`
 
 ### 使用Parser
 NaiveJSON.JSON 中有特定的解析器: Parser
@@ -207,6 +230,43 @@ naiveJSON_!!: JSON
 `json.format(indent: Int)`: 格式化JSON，以`indent`个空格进行缩进
 
 `json.format`: 作用同`json.format(2)`
+
+### Class 转换为 JSON
+
+一个对象（包括class，case class）都可以被转换为JSON
+
+`NaiveJSON.reflect.fromPlainClass[T](obj: T, objMapper: String => Option[String]): JSON`
+
+`obj` 被转换对象
+
+`objMapper` 将对象的属性名转换为新的名字，如果是`None`则不会包含这个属性
+
+例如，现有这么一个class
+
+```Scala
+case class Person(name: String, age: Int) //A top-level class
+```
+
+```Scala
+val person = Person("Elder", 91)
+val personJSON = 
+  NaiveJSON.reflect.fromPlainClass(person, {
+    case "name" => Some("fullName")
+    case x => Some(x)
+  })
+println(personJSON.format)
+```
+
+结果：
+
+```JSON
+{
+  "fullName": "Elder",
+  "age": 91
+}
+```
+
+如果你想要更复杂的功能，还是DSL更适合
 
 ## P.S.
 为了方便，在Test中我写了很多带感叹号的方法，尾缀_!!可能让你看着难受，写着也难受，这正是我的目的，NaiveJSON提供了很多Option和Either来解决错误问题。NaiveJSON更倾向于使用函数式的方法解决异常问题。
