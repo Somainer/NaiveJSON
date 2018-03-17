@@ -2,9 +2,9 @@ package moe.roselia.NaiveJSON
 
 import java.util.regex.Pattern
 
-import moe.roselia.NaiveJSON.States._
 import moe.roselia.NaiveJSON.Implicits._
 import moe.roselia.NaiveJSON.JSONStruct._
+import moe.roselia.NaiveJSON.States._
 
 object JSONParser extends Parsers {
   self =>

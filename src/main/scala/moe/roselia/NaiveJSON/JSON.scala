@@ -1,10 +1,7 @@
 package moe.roselia.NaiveJSON
 
-import java.util.regex.Pattern
-
 import moe.roselia.NaiveJSON.Implicits._
 import moe.roselia.NaiveJSON.JSONStruct._
-import moe.roselia.NaiveJSON.States._
 
 import scala.util.Try
 
@@ -67,18 +64,20 @@ trait JSON {
 
 object JSON {
   val struct = JSONStruct
-  def fromValue(v: Any):JSON = v match {
-    case x:Int => JInt(x)
-    case x:Double => JDouble(x)
-    case x:Boolean => JBool(x)
-    case x:String => JString(x)
-    case x:Seq[Any] => JArray(x.map(fromValue).toIndexedSeq)
-    case x:Map[String, Any] => JObject(x.map {
+
+  def fromValue(v: Any): JSON = v match {
+    case x: Int => JInt(x)
+    case x: Double => JDouble(x)
+    case x: Boolean => JBool(x)
+    case x: String => JString(x)
+    case x: Seq[Any] => JArray(x.map(fromValue).toIndexedSeq)
+    case x: Map[String, Any] => JObject(x.map {
       case (k, va) => k -> fromValue(va)
     })
     case _ => JNull
   }
-  def fromValueOption(v: Any):Option[JSON] = v match {
+
+  def fromValueOption(v: Any): Option[JSON] = v match {
     case null => Some(JNull)
     case x => fromValue(x) match {
       case JNull => None

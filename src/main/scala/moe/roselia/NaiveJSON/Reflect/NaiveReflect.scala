@@ -1,24 +1,25 @@
 package moe.roselia.NaiveJSON.Reflect
 
-import moe.roselia.NaiveJSON.JSONStruct._
 import moe.roselia.NaiveJSON.JSON
+import moe.roselia.NaiveJSON.JSONStruct._
 
+import scala.reflect._
 import scala.reflect.runtime.universe._
-import reflect._
 
 object NaiveReflect {
   /**
     * fromPlainClass[T](obj, objMapper)
-    * @param obj:T An object of T, convert to JSON according to objMapper
-    *           T MUST BE a top-leveled class, not nested class.
-    * @param objMapper: String => Option[String] = Some(_)
-    *                 A function, passing keys and returns Option[String] objMapper(key) match {
-    *                   case Some(newKey) => Replace (key, value) to (newKey, value) in obj
-    *                   case None => This field will not included.
-    *                 }
+    *
+    * @param obj       :T An object of T, convert to JSON according to objMapper
+    *                  T MUST BE a top-leveled class, not nested class.
+    * @param objMapper : String => Option[String] = Some(_)
+    *                  A function, passing keys and returns Option[String] objMapper(key) match {
+    *                     case Some(newKey) => Replace (key, value) to (newKey, value) in obj
+    *                     case None => This field will not included.
+    *                  }
     * @return JSON
-  * */
-  def fromPlainClass[A :TypeTag :ClassTag](obj: A, objMapper: String => Option[String] = Some(_)): JSON = {
+    **/
+  def fromPlainClass[A: TypeTag : ClassTag](obj: A, objMapper: String => Option[String] = Some(_)): JSON = {
     JSON.fromValueOption(obj) getOrElse JObject {
       val cls = obj.getClass
       val flds = cls.getDeclaredFields
@@ -38,11 +39,10 @@ object NaiveReflect {
     }
   }
 
-  def toPlainClass[T :TypeTag :ClassTag](obj: JSON):T = {
+  def toPlainClass[T: TypeTag : ClassTag](obj: JSON): T = {
     ???
     // TODO: Convert JSON to a class
   }
-
 
 
 }

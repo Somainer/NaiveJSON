@@ -5,11 +5,11 @@ import moe.roselia.NaiveJSON
 import java.util.Date
 
 object Benchmark {
-  def makeJSON(cnt: Int):JSON = JObjectOf("people" :- <:>((1 to cnt).map(i => {
+  def makeJSON(cnt: Int): JSON = JObjectOf("people" :- <:>((1 to cnt).map(i => {
     JObjectOf("id" :- i, "number" :- i.toString)
-  })), "total":- cnt)
+  })), "total" :- cnt)
 
-  def testToString(cnt: Int): Unit ={
+  def testToString(cnt: Int): Unit = {
     inspect("Building JSON of", cnt, "elements.")
     val pst = System.currentTimeMillis()
     val js = makeJSON(cnt)
@@ -27,14 +27,14 @@ object Benchmark {
     val js2 = NaiveJSON.parseJSON_!!(str)
     val ped2 = System.currentTimeMillis()
     inspect("Finish in", ped2 - pst2, "ms")
-    inspect("Should be true", js2 == js)//*/
+    inspect("Should be true", js2 == js) //*/
   }
 
-  def inspect(any: Any*): Unit ={
+  def inspect(any: Any*): Unit = {
     println(any.mkString(" "))
   }
 
   def main(args: Array[String]): Unit = {
-    1 to 6 map ("1"+"0"*_) map (_.toInt) foreach testToString
+    1 to 6 map ("1" + "0" * _) map (_.toInt) foreach testToString
   }
 }

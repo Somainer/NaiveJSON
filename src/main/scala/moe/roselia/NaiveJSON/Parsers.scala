@@ -2,11 +2,11 @@ package moe.roselia.NaiveJSON
 
 import java.util.regex.Pattern
 
-import scala.util.matching.Regex
-import moe.roselia.NaiveJSON.States._
 import moe.roselia.NaiveJSON.Implicits._
+import moe.roselia.NaiveJSON.States._
 
 import scala.util.Try
+import scala.util.matching.Regex
 
 trait Parsers {
   self =>

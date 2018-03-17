@@ -1,35 +1,17 @@
 import java.net.URL
 
 import moe.roselia.NaiveJSON
+import moe.roselia.NaiveJSON.DSL._
 import moe.roselia.NaiveJSON.dynamicJSON._
 import moe.roselia.NaiveJSON.parser._
-import moe.roselia.NaiveJSON.DSL._
-import moe.roselia.NaiveJSON.JSON
 
-import scala.beans.BeanProperty
 import scala.io.Source
-
-class NaiveStruct(x: Int) {
-  @BeanProperty var y: Int = x + 1
-
-  def wsp = x
-
-  def wsp_=(s: String): Unit = {
-    println("No fucking way, " + s)
-  }
-}
 
 class Person(val name: String, val age: Int, val gender: Boolean, val pet: Pet)
 
 case class Pet(name: String, tp: String)
 
 object RoseliaBlog {
-  def structor(): Unit = {
-    val n = new NaiveStruct(0)
-    println(n.y)
-    n.wsp = "233"
-  }
-
   def `testAST!`(): Unit = {
     val sample = JObjectOf("main" :- (
       "number" :- 123,
@@ -117,17 +99,17 @@ object RoseliaBlog {
     })
     IO inspect NaiveJSON.reflect.fromPlainClass(person.pet)
     //val fclsM = NaiveJSON.Macros.ClassLoader.fromPlainClass(person)
-    val smp = ("fullName" :- person.name) <+> ("age":- person.age) <+> ("gender":- person.gender) <+>
+    val smp = ("fullName" :- person.name) <+> ("age" :- person.age) <+> ("gender" :- person.gender) <+>
       ("pet" :- (
-        "name":- person.pet.name,
-        "tp":- person.pet.tp))
-    val altDSL = JObjectOf (
+        "name" :- person.pet.name,
+        "tp" :- person.pet.tp))
+    val altDSL = JObjectOf(
       "fullName" :- person.name,
       "age" :- person.age,
       "gender" :- person.gender,
       "pet" :- (
-        "name":- person.pet.name,
-        "tp":- person.pet.tp
+        "name" :- person.pet.name,
+        "tp" :- person.pet.tp
       )
     )
     println(fcls.format)

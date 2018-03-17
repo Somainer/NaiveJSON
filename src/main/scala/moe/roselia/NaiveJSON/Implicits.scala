@@ -1,46 +1,22 @@
 package moe.roselia.NaiveJSON
 
-import moe.roselia.NaiveJSON
 import moe.roselia.NaiveJSON.JSONStruct._
 
+import scala.languageFeature.{implicitConversions, postfixOps}
 import scala.util.Try
 
 trait Implicits {
   implicit def toNaiveString(s: String): NaiveString = NaiveString(s)
 
-  case class NaiveString(s: String) {
-    def toQuoted: String = "\"" + s + "\""
-
-    def indentOf(indent: Int)(dep: Int = 0): String = " " * (dep * indent) + s
-
-    def toEscaped: String = NaiveString.convertStr.foldRight(s) {
-      case ((frm, to), acc) => acc.replace(frm, to)
-    }
-
-    def toEscapedQuoted: String = toEscaped toQuoted
-
-  }
-
-  object NaiveString {
-    lazy val convertStr = List(
-      ("'", "\\'"),
-      ("\n", "\\\\n"),
-      ("\t", "\\\\t"),
-      ("\r", "\\\\r"),
-      ("\"", "\\\""),
-      ("\\", "\\\\")
-    )
-
-    def fromEscaped(s: String): String = convertStr.foldRight(s) {
-      case ((to, frm), acc) => acc.replace(frm, to)
-    }
-  }
-
   def parse[T: ParseOp](s: String): Option[T] = Try {
     implicitly[ParseOp[T]].op(s)
   } toOption
 
-  case class ParseOp[T](op: String => T)
+  def <:>(js: Seq[JSON]) = JArray(js.toIndexedSeq)
+
+  def <::>(js: JSON*) = JArray(js.toIndexedSeq)
+
+  def JArrayOf(js: JSON*) = JArray(js.toIndexedSeq)
 
   implicit val popDouble = ParseOp[Double](_.toDouble)
   implicit val popInt = ParseOp[Int](_.toInt)
@@ -80,18 +56,42 @@ trait Implicits {
   //implicit def toObject(ts: (String, JSON)):JObject = toObject(Map(ts))
   implicit def toObject(ts: (JString, JSON)): JObject = toObject(Map(ts._1.get -> ts._2))
 
-  def <:>(js: Seq[JSON]) = JArray(js.toIndexedSeq)
-
-  def <::>(js: JSON*) = JArray(js.toIndexedSeq)
-
-  def JArrayOf(js: JSON*) = JArray(js.toIndexedSeq)
-
   //def <--> (implicit js: (JString, JSON)*) = JObject(js.map(strUnTup).toMap)
   def <++>(js: JObject*): JObject = JObjectOf(js: _*)
 
   def JObjectOf(js: JObject*): JObject = if (js.isEmpty) JObject(Map()) else JObject(js.map(_.get).reduce(_ ++ _))
 
   def <->(js: Seq[(JString, JSON)]) = JObject(js.map(strUnTup).toMap)
+
+  case class NaiveString(s: String) {
+    def indentOf(indent: Int)(dep: Int = 0): String = " " * (dep * indent) + s
+
+    def toEscapedQuoted: String = toEscaped toQuoted
+
+    def toQuoted: String = "\"" + s + "\""
+
+    def toEscaped: String = NaiveString.convertStr.foldRight(s) {
+      case ((frm, to), acc) => acc.replace(frm, to)
+    }
+
+  }
+
+  case class ParseOp[T](op: String => T)
+
+  object NaiveString {
+    lazy val convertStr = List(
+      ("'", "\\'"),
+      ("\n", "\\\\n"),
+      ("\t", "\\\\t"),
+      ("\r", "\\\\r"),
+      ("\"", "\\\""),
+      ("\\", "\\\\")
+    )
+
+    def fromEscaped(s: String): String = convertStr.foldRight(s) {
+      case ((to, frm), acc) => acc.replace(frm, to)
+    }
+  }
 
   //def <-> (js: Seq[JObject]) = JObjectOf(js:_*)
 }
