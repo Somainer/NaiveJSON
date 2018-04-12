@@ -98,6 +98,8 @@ object RoseliaBlog {
       case x => Some(x)
     })
     IO inspect NaiveJSON.reflect.fromPlainClass(person.pet)
+    val pl = List.fill(5)(person)
+    IO inspect NaiveJSON.reflect.fromPlainClass(pl).format
     //val fclsM = NaiveJSON.Macros.ClassLoader.fromPlainClass(person)
     val smp = ("fullName" :- person.name) <+> ("age" :- person.age) <+> ("gender" :- person.gender) <+>
       ("pet" :- (

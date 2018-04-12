@@ -7,6 +7,8 @@ import scala.reflect._
 import scala.reflect.runtime.universe._
 
 object NaiveReflect {
+  def fromPlainClass[A: TypeTag : ClassTag](arr: Seq[A]): JArray =
+    JArray(arr.map(fromPlainClass(_)).toIndexedSeq)
   /**
     * fromPlainClass[T](obj, objMapper)
     *

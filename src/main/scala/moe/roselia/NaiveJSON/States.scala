@@ -23,7 +23,8 @@ object States {
 
     def getTrace: String = stack.map {
       case (l, s) =>
-        s"at: Line ${l.line}\n  in #${l.col} Found Error: $s\n"
+        s"at: Line ${l.line}\n  in #${l.col} Found Error: $s\n" +
+          s"\t>${l.input.substring(0,10.min(l.input.length))}\n"
     }.reduce(_ + _)
 
     def printTrace_!(): Unit = {
