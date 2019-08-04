@@ -20,6 +20,18 @@ trait Parsers {
       case r => r
     }
 
+  def orMax[A](s1: Parser[A], s2: => Parser[A]): Parser[A] = input =>
+    s1(input) match {
+      case Failure(_, false) => s2(input)
+      case res1@Success(_, c1) =>
+        s2(input) match {
+          case res2@Success(_, c2) => if(c1 < c2) res2 else res1
+          case Failure(_, false) => res1
+          case f => f
+      }
+      case f => f
+    }
+
   def map[A, B](p: Parser[A])(f: A => B): Parser[B] =
     p flatMap (a => succeed(f(a)))
 
@@ -113,8 +125,9 @@ trait Parsers {
   def quoted: Parser[String] =
     "\"" *> thru("\"").map(_ dropRight 1)
 
-  def escapedQuoted: Parser[String] =
-    token(quoted label "string literal")
+  def escapedQuoted: Parser[String] ="\"(((\\\\\")|[^\"])*)\"".r
+    .map(_.replace("\\\"", "\""))
+    .map(_.drop(1).dropRight(1)) label "String Literals"
 
   def doubleString: Parser[String] = token("[-+]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
 
@@ -141,6 +154,8 @@ trait Parsers {
 
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
+
+    def ||[B >: A](p2: Parser[B]): Parser[B] = self.orMax(p, p2)
 
     def or[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
 
